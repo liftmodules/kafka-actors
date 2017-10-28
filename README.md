@@ -1,5 +1,7 @@
 # Kafka Actors for Lift
 
+_This is still a work in progress and isn't yet available on Maven Central._
+
 This project implements Kafka Actors for Lift, a solution that allows Lift Actors to talk to
 one another via Kafka Brokers. This has value for distributed and non-distributed systems. It
 enables use cases such as:
