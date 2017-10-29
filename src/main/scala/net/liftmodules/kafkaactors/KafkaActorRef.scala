@@ -17,6 +17,7 @@ package net.liftmodules.kafkaactors
 
 import java.util.Properties
 import org.apache.kafka.clients.producer._
+import net.liftweb.common._
 import net.liftweb.actor._
 
 /**
@@ -25,25 +26,36 @@ import net.liftweb.actor._
  * This class conforms to the LiftActor shape so that it can be plugged into anything that would
  * normally take a LiftActor. However, as we've provided a custom implementation of the send method
  * this actor won't be able to define a working messageHandler.
+ *
+ * By default, this producer is configured to ensure all brokers acknowledge a message and to
+ * ensure that requests are properly ordered. It's also configured with 10 retries by default.
+ * If you'd like to customize these settings, you can override {{producerPropsCustomizer}} to
+ * change the {{Properties}} instance that we use to configure the producer.
+ *
+ * @param bootstrapServers The kafka broker list to connect to in the form of: "host1:port,host2:port,..."
+ * @param kafkaTopic The kafka topic to produce to.
  */
-abstract class KafkaActorRef extends LiftActor {
-  def bootstrapServers: String
-  def kafkaTopic: String
-  def acks: String = "all"
-  def retries: String = "100"
+abstract class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) extends LiftActor with Loggable {
+  /**
+   * Override this method in the implementing class to customize the producer settings
+   * to your liking.
+   */
+  def producerPropsCustomizer(props: Properties): Properties = props
 
   lazy val producer: Producer[Array[Byte], KafkaMessageEnvelope] = {
+    logger.info("Creating producer")
+
     val props = new Properties()
     props.put("bootstrap.servers", bootstrapServers)
-    props.put("acks", acks)
-    props.put("retries", retries)
-    props.put("batch.size", "16384")
-    props.put("linger.ms", "1")
-    props.put("buffer.memory", "33554432")
+    props.put("acks", "all")
+    props.put("retries", "10")
+    props.put("max.in.flight.requests.per.connection", "1")
     props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     props.put("value.serializer", "net.liftmodules.kafkaactors.KafkaMessageEnvelopeSerializer")
 
-    new KafkaProducer(props)
+    val customizedProps = producerPropsCustomizer(props)
+
+    new KafkaProducer(customizedProps)
   }
 
   override def !(message: Any): Unit = {
