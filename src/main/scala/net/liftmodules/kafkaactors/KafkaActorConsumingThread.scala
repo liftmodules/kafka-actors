@@ -89,8 +89,12 @@ private[kafkaactors] class KafkaActorConsumingThread(
       }
     } catch {
       case e: WakeupException =>
-        if (! closed.get())
+        if (! closed.get()) {
           throw e
+        } else {
+          consumer.foreach(_.close())
+          consumer = None
+        }
     }
   }
 
