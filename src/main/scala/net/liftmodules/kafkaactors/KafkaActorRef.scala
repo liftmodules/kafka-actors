@@ -35,7 +35,7 @@ import net.liftweb.actor._
  * @param bootstrapServers The kafka broker list to connect to in the form of: "host1:port,host2:port,..."
  * @param kafkaTopic The kafka topic to produce to.
  */
-abstract class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) extends LiftActor with Loggable with Tryo {
+abstract class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) extends SpecializedLiftActor[Any] with Loggable with Tryo {
   /**
    * Override this method in the implementing class to customize the producer settings
    * to your liking.
