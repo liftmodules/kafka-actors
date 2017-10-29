@@ -25,15 +25,10 @@ import scala.collection.JavaConverters._
  *
  * This actor imposes a few restrictions that normal LiftActors do not. Specifically:
  *
- * - All message must subtype KafkaActorMessage and be serializable with lift-json.
- * - You must define your message handling in userMessageHandler.
- * - You cannot override the processing of any InternalKafkaActorMessage such as:
- *   - StartConsumer
- *   - StopConsumer
- *   - CommitOffsets
- * - You may, however, manually send those messages at any time.
+ * - You must define your message handling in userMessageHandler instead of messageHandler.
+ * - You cannot override the processing of any InternalKafkaActorMessage.
  *
- * Other than the above, this Actor behaves very similarly to a normal SpecializedLiftActor.
+ * Other than the above, this Actor behaves very similarly to a normal LiftActor.
  * You can send messages directly to it, thus bypassing Kafka, by using its `!` or `send` methods.
  *
  * You will need to override a few values to have it work correctly:
@@ -43,6 +38,9 @@ import scala.collection.JavaConverters._
  * - kafkaTopic: The topic the actor should subscribe to
  * - pollTime: The amount of time, in milliseconds, the consumer should wait for records before
  *   looping to handle housecleaning tasks.
+ *
+ * Once you've implemented and instantiated an instance of your class, you'll need to send the
+ * message `SartConsumer` to actually connect to and start consuming messages from Kafka.
  */
 abstract class KafkaActor extends LiftActor {
   def bootstrapServers: String
