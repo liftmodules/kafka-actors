@@ -38,7 +38,7 @@ abstract class KafkaActorRef extends LiftActor {
     producer.send(record)
   }
 
-  override def messageHandler = {
+  final override def messageHandler = {
     case _ =>
   }
 }
