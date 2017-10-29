@@ -1,6 +1,6 @@
 name := "kafka-actors"
 
-version := "0.0.1-SNAPSHOT"
+version := "0.1.0"
 
 organization := "net.liftmodules"
 
