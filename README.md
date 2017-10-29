@@ -34,7 +34,18 @@ Further, like the rest of Lift, this requires Java 8.
 
 This library is built against Lift 3.1, and should work with any 3.1.x build.
 
-This library hasn't yet been released to Maven Central, but will soon.
+To use this project add it to your library dependencies:
+
+```scala
+libraryDependencies += "net.liftmodules" %% "kafka-actors_3.1" % "0.1.0"
+```
+
+If you don't already use lift-webkit, then make sure you have lift-json and lift-actor as well:
+
+```scala
+libraryDependencies += "net.liftweb" %% "lift-actor" % "3.1.1"
+libraryDependencies += "net.liftweb" %% "lift-json" % "3.1.1"
+```
 
 ## Using Kafka Actors
 
@@ -140,6 +151,22 @@ Some things we'd like to get done on this next:
   there's a multi-stack environment in play.
 * Improve the test coverage.
 * Support at most once processing in addition to at least once processing.
+
+## Contributing
+
+This project is governed by [Lift's Contributing Guidelines][lcg]. Support for a release of this
+Lift Module will roughly follow [Lift's Support Schedule][lss] for the release of Lift that the
+version was built against, with some minor alterations. In summary:
+
+* We'll continue to deliver new functionality for the current version of Lift only.
+* We originally built this for Lift 3.1, and will not back-port it to older editions.
+* Minor fixes will be delivered for old versions of this module _if_ the edition of Lift it was
+  built against is still receiving minor fixes.
+* Security fixes will be delivered for old versions of this module _if_ the edition of Lift it
+  was built against is still receiving security fixes.
+
+[lcg]: https://github.com/lift/framework/blob/master/CONTRIBUTING.md
+[lss]: https://github.com/lift/framework/blob/master/SUPPORT.md
 
 ## License
 
