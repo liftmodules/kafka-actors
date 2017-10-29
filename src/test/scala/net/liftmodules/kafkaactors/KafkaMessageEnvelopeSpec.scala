@@ -22,6 +22,14 @@ class KafkaMessageEnvelopeSpec extends FlatSpec with Matchers {
     assertIdentity(ExperimentalCaseClass2("applesuce", ExperimentalCaseClass1("bacon", 10)))
   }
 
+  it should "support generic case glasses" in {
+    assertIdentity(ExperimentalCaseClass3[String]("apple"))
+  }
+
+  it should "support parent traits" in {
+    assertIdentity[ExperimentalParentTrait](ExperimentalCaseClass4("abcd"))
+  }
+
   private[this] def assertIdentity[T](thing: T)(implicit mf: Manifest[T]) = {
     val envelope = KafkaMessageEnvelope(thing)
     val extracted = KafkaMessageEnvelope.extract[T](envelope)
@@ -32,3 +40,7 @@ class KafkaMessageEnvelopeSpec extends FlatSpec with Matchers {
 
 case class ExperimentalCaseClass1(name: String, number: Int)
 case class ExperimentalCaseClass2(name: String, child: ExperimentalCaseClass1)
+case class ExperimentalCaseClass3[T](name: T)
+
+trait ExperimentalParentTrait
+case class ExperimentalCaseClass4(name: String) extends ExperimentalParentTrait
