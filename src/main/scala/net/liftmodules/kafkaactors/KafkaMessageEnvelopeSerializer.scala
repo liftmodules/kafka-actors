@@ -12,7 +12,7 @@ class KafkaMessageEnvelopeSerializer extends Serializer[KafkaMessageEnvelope] {
 
   override def configure(configs: JMap[String, _], isKey: Boolean): Unit = ()
 
-  override def serialize(topic: String, data: KafkaMessageEnvelope): Array[Byte] = {
-    compactRender(decompose(data)).getBytes("UTF-8")
+  override def serialize(topic: String, envelope: KafkaMessageEnvelope): Array[Byte] = {
+    compactRender(envelope.decomposedData).getBytes("UTF-8")
   }
 }

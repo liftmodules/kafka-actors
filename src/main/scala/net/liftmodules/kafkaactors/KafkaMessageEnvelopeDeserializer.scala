@@ -13,6 +13,7 @@ class KafkaMessageEnvelopeDeserializer extends Deserializer[KafkaMessageEnvelope
 
   override def deserialize(topic: String, data: Array[Byte]): KafkaMessageEnvelope = {
     val jsonString = new String(data, "UTF-8")
-    parse(jsonString).extract[KafkaMessageEnvelope]
+    val parsedJson = parse(jsonString)
+    KafkaMessageEnvelope(parsedJson)
   }
 }
