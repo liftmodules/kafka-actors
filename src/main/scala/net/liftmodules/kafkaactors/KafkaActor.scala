@@ -81,12 +81,33 @@ import scala.collection.JavaConverters._
  * cause you to want to avoid checkpointing offsets to Kafka, you sould throw an exception of
  * some sort in your `userMessageHandler` so things blow up.
  *
+ * == Sending messages ==
+ *
+ * `KafkaActor` works like a normal actor if you use the regular sending methods. However, you may
+ * find it useful to send messages to this actor _through_ Kafka even when the actor is running
+ * in the local process. To facilitate this, you can send messages through the included `ref`
+ * like so:
+ *
+ * {{{
+ * myKafkaActor.ref ! MyMessage()
+ * }}}
+ *
+ * This will cause the message to be routed through a Kafka producer and then consumed by the
+ * actor using the normal consumption means.
+ *
  */
 abstract class KafkaActor extends LiftActor {
   def bootstrapServers: String
   def groupId: String
   def kafkaTopic: String
   def pollTime: Long = 500L
+
+  /**
+   * The ref for this actor that permits sending messages through the Kafka broker instead of
+   * directly to the actor itself. Override this implementation if you need to include custom
+   * producing behavior in the `KafkaActorRef`.
+   */
+  lazy val ref = new KafkaActorRef(bootstrapServers, kafkaTopic)
 
   /**
    * Override this method in the implementing class to customize the consumer settings
