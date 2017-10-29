@@ -4,11 +4,11 @@ import java.io._
 import net.liftweb.json._
 import net.liftweb.json.Extraction._
 
-case class KafkaMessageEnvelope(
+private[kafkaactors] case class KafkaMessageEnvelope(
   decomposedData: JValue
 )
 
-object KafkaMessageEnvelope {
+private[kafkaactors] object KafkaMessageEnvelope {
   implicit val formats = DefaultFormats + FullTypeHints(classOf[Object] :: Nil)
 
   def apply[T](data: T)(implicit manifest: Manifest[T]): KafkaMessageEnvelope = {

@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
  * tack an extra message, CommitOffsets, onto the end that will cause the actor
  * to signal this thread that those offsets are ready to commit.
  */
-class KafkaActorConsumingThread(
+private[kafkaactors] class KafkaActorConsumingThread(
   name: String,
   consumerFn: ()=>KafkaConsumer[Array[Byte], KafkaMessageEnvelope],
   parentActor: KafkaActor,

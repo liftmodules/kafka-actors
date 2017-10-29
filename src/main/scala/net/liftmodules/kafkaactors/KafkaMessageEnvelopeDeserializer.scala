@@ -4,7 +4,7 @@ import java.util.{Map => JMap}
 import org.apache.kafka.common.serialization._
 import net.liftweb.json._
 
-class KafkaMessageEnvelopeDeserializer extends Deserializer[KafkaMessageEnvelope] {
+private[kafkaactors] class KafkaMessageEnvelopeDeserializer extends Deserializer[KafkaMessageEnvelope] {
   implicit val formats = DefaultFormats
 
   override def close(): Unit = ()

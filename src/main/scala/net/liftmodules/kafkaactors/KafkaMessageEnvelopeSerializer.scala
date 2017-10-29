@@ -5,7 +5,7 @@ import org.apache.kafka.common.serialization._
 import net.liftweb.json.{Serializer => _, _}
 import net.liftweb.json.Extraction._
 
-class KafkaMessageEnvelopeSerializer extends Serializer[KafkaMessageEnvelope] {
+private[kafkaactors] class KafkaMessageEnvelopeSerializer extends Serializer[KafkaMessageEnvelope] {
   implicit val formats = DefaultFormats
 
   override def close(): Unit = ()
