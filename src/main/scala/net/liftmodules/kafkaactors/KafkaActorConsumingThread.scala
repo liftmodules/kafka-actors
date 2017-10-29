@@ -93,7 +93,9 @@ class KafkaActorConsumingThread(
         for (consumer <- consumer) {
           consumer.commitAsync(pendingOffsetCommit, (offsets: JMap[TopicPartition, OffsetAndMetadata], exception: Exception) => {
             if (exception != null) {
-              logger.error("Exception while committing offsets", exception)
+              logger.error(s"Exception while committing offsets", exception)
+            } else {
+              logger.debug(s"Offsets were committed successfully")
             }
 
             pendingOffsetCommit.clear()
