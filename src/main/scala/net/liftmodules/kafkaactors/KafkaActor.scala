@@ -54,7 +54,7 @@ abstract class KafkaActor extends LiftActor {
    */
   def consumerPropsCustomizer(props: Properties): Properties = props
 
-  def consumerFn(): KafkaConsumer[Array[Byte], KafkaMessageEnvelope] = {
+  private[this] def consumerFn(): KafkaConsumer[Array[Byte], KafkaMessageEnvelope] = {
     val props = new Properties()
     props.put("bootstrap.servers", bootstrapServers)
     props.put("group.id", groupId)
