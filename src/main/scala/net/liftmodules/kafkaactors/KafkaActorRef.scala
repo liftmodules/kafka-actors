@@ -68,7 +68,7 @@ abstract class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) exten
     logger.error("An exception occurred while trying to produce messages to Kafka", exception)
   }
 
-  lazy val producer: Producer[Array[Byte], KafkaMessageEnvelope] = {
+  private[this] lazy val producer: Producer[Array[Byte], KafkaMessageEnvelope] = {
     logger.info("Creating producer")
 
     val props = new Properties()
