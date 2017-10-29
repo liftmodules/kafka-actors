@@ -48,6 +48,12 @@ abstract class KafkaActor extends LiftActor {
   def kafkaTopic: String
   def pollTime: Long
 
+  /**
+   * Override this method in the implementing class to customize the consumer settings
+   * to your liking.
+   */
+  def consumerPropsCustomizer(props: Properties): Properties = props
+
   def consumerFn(): KafkaConsumer[Array[Byte], KafkaMessageEnvelope] = {
     val props = new Properties()
     props.put("bootstrap.servers", bootstrapServers)
@@ -55,7 +61,9 @@ abstract class KafkaActor extends LiftActor {
     props.put("enable.auto.commit", "false")
     props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("value.deserializer", "net.liftmodules.kafkaactors.KafkaMessageEnvelopeDeserializer")
-    val consumer = new KafkaConsumer[Array[Byte], KafkaMessageEnvelope](props)
+
+    val customizedProps = consumerPropsCustomizer(props)
+    val consumer = new KafkaConsumer[Array[Byte], KafkaMessageEnvelope](customizedProps)
 
     consumer.subscribe(List(kafkaTopic).asJava)
     consumer
