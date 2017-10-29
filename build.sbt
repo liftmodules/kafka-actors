@@ -6,6 +6,8 @@ organization := "net.liftmodules"
 
 scalaVersion := "2.12.4"
 
+crossScalaVersions := Seq("2.11.11", "2.12.4")
+
 val liftVersion = settingKey[String]("Lift Web Framework full version number")
 val liftEdition = settingKey[String]("Lift Edition (such as 2.6 or 3.0)")
 val kafkaVersion = settingKey[String]("Version of Kafka")
