@@ -39,8 +39,8 @@ Using Kafka Actors imposes a few restrictions on the messages you can send to yo
 
 Specifically:
 
-* Your messages must extends `KafkaActorMessage`
 * Your messages must be serializable and deserializable with lift-json
+* Generally the above means that you can't get fancy with generic types
 
 If these constraints don't cramp your style, then Kafka Actors may be for you. To get started
 you'll need to declare the actual implementation of your actor. Consider the following example
@@ -50,7 +50,7 @@ from our example code in this repo:
 import net.liftmodules.kafkaactors._
 import net.liftweb.common._
 
-case class Ping() extends KafkaActorMessage
+case class Ping()
 
 object ExampleConsumer extends KafkaActor with Loggable {
   override val bootstrapServers = "localhost:9092"
