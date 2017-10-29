@@ -132,7 +132,7 @@ abstract class KafkaActor extends LiftActor {
 
   protected lazy val consumingThread: KafkaActorConsumingThread = new KafkaActorConsumingThread(
     groupId + "-consuming-thread",
-    consumerFn,
+    consumerFn _,
     this,
     pollTime
   )
