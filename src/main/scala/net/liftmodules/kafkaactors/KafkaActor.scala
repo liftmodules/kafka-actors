@@ -25,28 +25,68 @@ import scala.collection.JavaConverters._
  *
  * This actor imposes a few restrictions that normal LiftActors do not. Specifically:
  *
- * - You must define your message handling in userMessageHandler instead of messageHandler.
- * - You cannot override the processing of any InternalKafkaActorMessage.
+ *  - You must define your message handling in `userMessageHandler` instead of `messageHandler`.
+ *  - You cannot override the processing of any `InternalKafkaActorMessage`.
  *
- * Other than the above, this Actor behaves very similarly to a normal LiftActor.
+ * Other than the above, this Actor behaves very similarly to a normal `LiftActor`.
  * You can send messages directly to it, thus bypassing Kafka, by using its `!` or `send` methods.
  *
- * You will need to override a few values to have it work correctly:
+ * == Configuration ==
  *
- * - bootstrapServers: This needs to be the broker list for your Kafka cluster
- * - groupId: This is the groupId the actor should consume under. See Kafka docs for more details.
- * - kafkaTopic: The topic the actor should subscribe to
- * - pollTime: The amount of time, in milliseconds, the consumer should wait for records before
- *   looping to handle housecleaning tasks.
+ * For this actor to work correctly with Kafka, you'll ahve to provide it with some basic
+ * configuration. The required overrides are:
  *
- * Once you've implemented and instantiated an instance of your class, you'll need to send the
- * message `SartConsumer` to actually connect to and start consuming messages from Kafka.
+ *  - `bootstrapServers`: This needs to be the broker list for your Kafka cluster
+ *  - `groupId`: This is the groupId the actor should consume under. See Kafka docs for more details.
+ *  - `kafkaTopic`: The topic the actor should subscribe to
+ *
+ * The Kafka consumer works by polling for a certain number of milliseconds, and then returning if
+ * no messages are retrieved. We abstract away that event loop behavior, but sometimes applications
+ * need to tweak how long the consumer will sleep in order to optimize performance. To change that
+ * you can also override the following:
+ *
+ *  - `pollTime`: The amount of time, in milliseconds, the consumer should wait for recrods. Defaults to 500ms.
+ *
+ * If you need to tune more specific settings, you can provide a `consumerPropsCustomizer` that
+ * will get to alter the `Properties` object before we pass it into the `KafkaConsumer` constructor.
+ * This is what you'll need to implement if you want to provide custom settings for things like
+ * authentication, encryption, etc. By default, we provide the bootstrap servers, the group ID,
+ * we disable auto committing, and provide a key and value serializer implementation.
+ *
+ * Please be careful when overriding settings that were set by the `KafkaActor` itself.
+ *
+ * == Starting consumption ==
+ *
+ * Once the actor is created, it'll behave like a normal `LiftActor` until its told to connect
+ * up to Kafka and start consuming messages. To do that your code will need to transmit the
+ * `[[StartConsumer]]` message to it like so:
+ *
+ * {{{
+ * actor ! StartConsumer
+ * }}}
+ *
+ * You can also stop consuming anytime you like by transmitting `[[StopConsumer]]` or you can
+ * force committing offsets by transmitting `[[CommitOffsets]]` to the actor if you need to do
+ * so for some reason, though as mentioned below those cases should be rare.
+ *
+ * == Processing messages ==
+ *
+ * When messages come from the topic, they will be parsed and extracted to case class objects
+ * using lift-json. The messages will then be put in the actor's normal mailbox using `!` and be
+ * subjet to normal actor processing rules. Every time the actor consumes messages it'll also
+ * add a `[[CommitOffsets]]` message onto the end of the message batch.
+ *
+ * Because of the way the actor mailbox works, `CommitOffsets` won't be processed until all of
+ * the messages in that batch have been processed. Thus, if you have a class of errors that may
+ * cause you to want to avoid checkpointing offsets to Kafka, you sould throw an exception of
+ * some sort in your `userMessageHandler` so things blow up.
+ *
  */
 abstract class KafkaActor extends LiftActor {
   def bootstrapServers: String
   def groupId: String
   def kafkaTopic: String
-  def pollTime: Long
+  def pollTime: Long = 500L
 
   /**
    * Override this method in the implementing class to customize the consumer settings
