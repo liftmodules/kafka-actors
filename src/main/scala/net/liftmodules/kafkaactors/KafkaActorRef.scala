@@ -7,7 +7,7 @@ import net.liftweb.actor._
 /**
  * A ref to a KafkaActor that will send its message through Kafka.
  */
-abstract class KafkaActorRef extends SpecializedLiftActor[Any] {
+abstract class KafkaActorRef extends LiftActor {
   def bootstrapServers: String
   def kafkaTopic: String
   def acks: String = "all"

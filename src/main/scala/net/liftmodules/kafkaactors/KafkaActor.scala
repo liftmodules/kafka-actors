@@ -29,7 +29,7 @@ import scala.collection.JavaConverters._
  * - pollTime: The amount of time, in milliseconds, the consumer should wait for records before
  *   looping to handle housecleaning tasks.
  */
-abstract class KafkaActor extends SpecializedLiftActor[Any] {
+abstract class KafkaActor extends LiftActor {
   def bootstrapServers: String
   def groupId: String
   def kafkaTopic: String
