@@ -8,7 +8,7 @@ object ExampleConsumer extends KafkaActor with Loggable {
   override val bootstrapServers = "localhost:9092"
   override val kafkaTopic = "kafka-actors-example-consumer"
   override val groupId = "kafka-actors-example-consumer"
-  override val pollTime = 1000
+  override val pollTime = 1000L
 
   override def userMessageHandler = {
     case Ping() =>
