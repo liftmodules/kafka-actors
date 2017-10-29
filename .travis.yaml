@@ -1,0 +1,20 @@
+language: scala
+scala:
+  - 2.12.4
+  - 2.11.11
+
+jdk:
+  - oraclejdk8
+
+script:
+  - sbt compile
+  - sbt test
+
+cache:
+  directories:
+    - $HOME/.ivy2
+    - $HOME/.sbt
+
+branches:
+  only:
+    - master
