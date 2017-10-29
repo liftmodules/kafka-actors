@@ -1,6 +1,6 @@
 # Kafka Actors for Lift
 
-_This is still a work in progress and isn't yet available on Maven Central._
+_This project is still a work in progress, and its API is still rapidly evolving._
 
 This project implements Kafka Actors for Lift, a solution that allows Lift Actors to talk to
 one another via Kafka Brokers. This has value for distributed and non-distributed systems. It
@@ -19,6 +19,9 @@ enables use cases such as:
   message broker solutions.
 * **Load sharing.** If you have actors doing heavy lifting in your system, you may wish to run
   many processes connected to a multi-partition topic to spread the load around your infrastructure.
+  `KafkaActor`s that connect to the same topic with the same group ID will have different
+  partitions assigned to them by Kafka. This effectively means you can send requests to "the cluster
+  of all actors currently connected to Kafka" and hard things like failover are handled for you.
 
 This project is still in early, experimental development. However, we believe it could be useful
 to anyone who would like to pair Lift Actors with a Kafka broker backend.
@@ -98,20 +101,31 @@ Now how do we send messages do this actor _via_ Kafka? We need a `KafkaActorRef`
 abstraction over producing messages to Kafka. Declaring one is pretty simple:
 
 ```scala
-object ExampleConsumerRef extends KafkaActorRef with Loggable {
-  override val bootstrapServers = "localhost:9092"
-  override val kafkaTopic = "kafka-actors-example-consumer"
-}
+val exampleConsumerRef = new KafkaActorRef(
+  bootstrapServers = "localhost:9092",
+  kafkaTopic = "kafka-actors-example-consumer"
+)
 ```
 
 Then, we just send the message to the actor:
 
 ```scala
-ExampleConsumerRef ! Ping()
+exampleConsumerRef ! Ping()
 ```
 
 This instance of ping will be produced to the Kafka topic and consumed on by the `KafkaActor` on
 the other end.
+
+If the actor that you would like to send a message to is actually available in the current process,
+but you just want to take advantage of the Kafka-backed functionality, you can use the `ref` that
+comes packaged with the `KafkaActor`.
+
+```scala
+ExampleConsumer.ref ! Ping()
+```
+
+This will route the `Ping` message through a pre-build `KafkaActorRef` that goes to Kafka and the
+message will then be consumed by the actor during the next Kafka consumption poll.
 
 ## Limitations and Roadmap
 
@@ -119,6 +133,11 @@ Some things we'd like to get done on this next:
 
 * Currently, this requires that your message be serializable with the `DefaultFormats` of lift-json.
   Support for custom serializers would be a huge win.
+* Messages are also required to have a type hint to be deserialized. This is well suited for
+  different parts of the same Scala application that need to talk to each other, but not so well
+  suited for messages that may originate from a totally different stack. We would eventually like
+  to provide hooks where more specialized serialization behavior could be applied for cases where
+  there's a multi-stack environment in play.
 * Improve the test coverage.
 * Support at most once processing in addition to at least once processing.
 

@@ -29,8 +29,8 @@ import net.liftweb.actor._
  *
  * By default, this producer is configured to ensure all brokers acknowledge a message and to
  * ensure that requests are properly ordered. It's also configured with 10 retries by default.
- * If you'd like to customize these settings, you can override {{producerPropsCustomizer}} to
- * change the {{Properties}} instance that we use to configure the producer.
+ * If you'd like to customize these settings, you can override `producerPropsCustomizer` to
+ * change the `Properties` instance that we use to configure the producer.
  *
  * @param bootstrapServers The kafka broker list to connect to in the form of: "host1:port,host2:port,..."
  * @param kafkaTopic The kafka topic to produce to.
@@ -92,6 +92,9 @@ class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) extends Specia
       onCompletionCallback(metadata, exception)
   }
 
+  /**
+   * Produces `message` to `kafkaTopic`, blocking until the send call to the brokers is complete.
+   */
   override def !(message: Any): Unit = {
     val envelope = KafkaMessageEnvelope(message)
     val record = new ProducerRecord[Array[Byte], KafkaMessageEnvelope](kafkaTopic, envelope)
@@ -104,6 +107,14 @@ class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) extends Specia
     }
   }
 
+  /**
+   * A no-op message handler that cannot be overridden.
+   *
+   * We wanted this class to fit the shape of an actor so that it could be used
+   * mostly interchangably with regular actors. To do that we had to provide a `messageHandler`
+   * of some sort. However, because of the nature of the way this class works, it will never
+   * handle messages locally and as such has no implementation for doing so.
+   */
   final override def messageHandler = {
     case _ =>
   }
