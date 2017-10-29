@@ -91,14 +91,18 @@ class KafkaActorConsumingThread(
     PendingOffsetsLock.synchronized {
       if (! pendingOffsetCommit.isEmpty) {
         for (consumer <- consumer) {
-          consumer.commitAsync(pendingOffsetCommit, (offsets: JMap[TopicPartition, OffsetAndMetadata], exception: Exception) => {
-            if (exception != null) {
-              logger.error(s"Exception while committing offsets", exception)
-            } else {
-              logger.debug(s"Offsets were committed successfully")
-            }
+          consumer.commitAsync(pendingOffsetCommit, new OffsetCommitCallback {
+            override def onComplete(offsets: JMap[TopicPartition, OffsetAndMetadata], exception: Exception) = {
+              if (exception != null) {
+                logger.error(s"Exception while committing offsets", exception)
+              } else {
+                logger.debug(s"Offsets were committed successfully")
+              }
 
-            pendingOffsetCommit.clear()
+              PendingOffsetsLock.synchronized {
+                pendingOffsetCommit.clear()
+              }
+            }
           })
         }
       }
