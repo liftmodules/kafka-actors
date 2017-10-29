@@ -54,7 +54,7 @@ class KafkaActorConsumingThread(
 
         for (record <- records) {
           val envelope = record.value()
-          val actorMessage = KafkaMessageEnvelope.extract[KafkaActorMessage](envelope)
+          val actorMessage = KafkaMessageEnvelope.extract[Any](envelope)
 
           parentActor ! actorMessage
 

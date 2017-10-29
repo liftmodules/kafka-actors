@@ -2,7 +2,7 @@ package net.liftmodules.kafkaactors
 
 import net.liftweb.common._
 
-case class Ping() extends KafkaActorMessage
+case class Ping()
 
 object ExampleConsumer extends KafkaActor with Loggable {
   override val bootstrapServers = "localhost:9092"

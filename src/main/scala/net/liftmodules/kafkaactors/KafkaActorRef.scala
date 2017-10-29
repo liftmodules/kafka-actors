@@ -7,7 +7,7 @@ import net.liftweb.actor._
 /**
  * A ref to a KafkaActor that will send its message through Kafka.
  */
-abstract class KafkaActorRef extends SpecializedLiftActor[KafkaActorMessage] {
+abstract class KafkaActorRef extends SpecializedLiftActor[Any] {
   def bootstrapServers: String
   def kafkaTopic: String
   def acks: String = "all"
@@ -27,7 +27,7 @@ abstract class KafkaActorRef extends SpecializedLiftActor[KafkaActorMessage] {
     new KafkaProducer(props)
   }
 
-  override def !(message: KafkaActorMessage): Unit = {
+  override def !(message: Any): Unit = {
     val envelope = KafkaMessageEnvelope(message)
     val record = new ProducerRecord[Array[Byte], KafkaMessageEnvelope](kafkaTopic, envelope)
 
