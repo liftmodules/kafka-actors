@@ -35,12 +35,38 @@ import net.liftweb.actor._
  * @param bootstrapServers The kafka broker list to connect to in the form of: "host1:port,host2:port,..."
  * @param kafkaTopic The kafka topic to produce to.
  */
-abstract class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) extends LiftActor with Loggable {
+abstract class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) extends LiftActor with Loggable with Tryo {
   /**
    * Override this method in the implementing class to customize the producer settings
    * to your liking.
    */
   def producerPropsCustomizer(props: Properties): Properties = props
+
+  /**
+   * Override this method to provide custom success and error handling when the producer has
+   * finished its round trip to the broker. The default implementation will simply log an
+   * exception if one occurs and prevent it from being re-thrown.
+   *
+   * If ensuring delivery is super-important to your application, you may wish to override
+   * this to cause your application to crash if producing isn't working.
+   */
+  def onCompletionCallback(metadata: RecordMetadata, exception: Exception): Unit = {
+    if (Option(exception).isDefined) {
+      logger.error("An exception occurred while trying to produce messages to Kafka", exception)
+    }
+  }
+
+  /**
+   * Override this method to provide custom error handling when an exception is thrown from
+   * the producer's send method. The default implementation will simply log the exception and
+   * prevent it from being re-thrown.
+   *
+   * Please refer to the Kafka documentation for the current kinds of exception the Kafka
+   * Producer's send method may return.
+   */
+  def onProducerException(exception: Exception): Unit = {
+    logger.error("An exception occurred while trying to produce messages to Kafka", exception)
+  }
 
   lazy val producer: Producer[Array[Byte], KafkaMessageEnvelope] = {
     logger.info("Creating producer")
@@ -58,11 +84,21 @@ abstract class KafkaActorRef(bootstrapServers: String, kafkaTopic: String) exten
     new KafkaProducer(customizedProps)
   }
 
+  private[this] lazy val producerCallback: Callback = new Callback {
+    override def onCompletion(metadata: RecordMetadata, exception: Exception) =
+      onCompletionCallback(metadata, exception)
+  }
+
   override def !(message: Any): Unit = {
     val envelope = KafkaMessageEnvelope(message)
     val record = new ProducerRecord[Array[Byte], KafkaMessageEnvelope](kafkaTopic, envelope)
 
-    producer.send(record)
+    tryo(producer.send(record, producerCallback)) match {
+      case Failure(_, Full(exception: Exception), _) =>
+        onProducerException(exception)
+
+      case _ =>
+    }
   }
 
   final override def messageHandler = {
