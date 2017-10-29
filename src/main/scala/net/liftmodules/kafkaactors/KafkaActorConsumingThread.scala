@@ -16,6 +16,12 @@ import scala.collection.JavaConverters._
  * once. The KafkaActorConsumingThread abstraction makes that possible. This
  * abstraction will receive messages from the Kafka broker, deserialize them,
  * and then pass them into the actor as if it was a normal message.
+ *
+ * This class also wraps a bit of internal state tracking around committing
+ * offsets to ensure that offsets are committed after the actor using this
+ * thread has successfully processed the batch of messages. To do this we
+ * tack an extra message, CommitOffsets, onto the end that will cause the actor
+ * to signal this thread that those offsets are ready to commit.
  */
 class KafkaActorConsumingThread(
   name: String,
@@ -87,23 +93,30 @@ class KafkaActorConsumingThread(
     }
   }
 
+  /**
+   * This is the callback for offset commiting. It will execute whenever a commit offsets request
+   * has completed an log the status of the offset committing - at ERROR level when exceptions
+   * occurs and at DEBUG level otherwise.
+   */
+  private[this] val offsetCommitCallback = new OffsetCommitCallback {
+    override def onComplete(offsets: JMap[TopicPartition, OffsetAndMetadata], exception: Exception) = {
+      if (exception != null) {
+        logger.error(s"Exception while committing offsets", exception)
+      } else {
+        logger.debug(s"Offsets were committed successfully")
+      }
+
+      PendingOffsetsLock.synchronized {
+        pendingOffsetCommit.clear()
+      }
+    }
+  }
+
   private[this] def commitAnyPendingOffsets() = {
     PendingOffsetsLock.synchronized {
       if (! pendingOffsetCommit.isEmpty) {
         for (consumer <- consumer) {
-          consumer.commitAsync(pendingOffsetCommit, new OffsetCommitCallback {
-            override def onComplete(offsets: JMap[TopicPartition, OffsetAndMetadata], exception: Exception) = {
-              if (exception != null) {
-                logger.error(s"Exception while committing offsets", exception)
-              } else {
-                logger.debug(s"Offsets were committed successfully")
-              }
-
-              PendingOffsetsLock.synchronized {
-                pendingOffsetCommit.clear()
-              }
-            }
-          })
+          consumer.commitAsync(pendingOffsetCommit, offsetCommitCallback)
         }
       }
     }
