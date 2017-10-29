@@ -6,6 +6,10 @@ import net.liftweb.actor._
 
 /**
  * A ref to a KafkaActor that will send its message through Kafka.
+ *
+ * This class conforms to the LiftActor shape so that it can be plugged into anything that would
+ * normally take a LiftActor. However, as we've provided a custom implementation of the send method
+ * this actor won't be able to define a working messageHandler.
  */
 abstract class KafkaActorRef extends LiftActor {
   def bootstrapServers: String
