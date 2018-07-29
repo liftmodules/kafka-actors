@@ -32,23 +32,23 @@ To add this to your project, you'll want to ensure that you include `lift-json` 
 Both are required for this to work correctly. (If you have `lift-webkit` you already have them.)
 Further, like the rest of Lift, this requires Java 8.
 
-This library is built against Lift 3.1 and 3.2, and should work with any
+This library is built against Lift 3.2 and 3.3, and should work with any
 Lift build with these versions.
 
 To use this project add it to your library dependencies:
 
 ```scala
-libraryDependencies += "net.liftmodules" %% "kafka-actors_3.2" % "0.1.0"
+libraryDependencies += "net.liftmodules" %% "kafka-actors_3.3" % "0.2.0"
 ```
 
-If you're using Lift 3.1, change the suffix on the artifact name above to
-`_3.1` instead.
+If you're using Lift 3.2, change the suffix on the artifact name above to
+`_3.2` instead.
 
 If you don't already use lift-webkit, then make sure you have lift-json and lift-actor as well:
 
 ```scala
-libraryDependencies += "net.liftweb" %% "lift-actor" % "3.2.0"
-libraryDependencies += "net.liftweb" %% "lift-json" % "3.2.0"
+libraryDependencies += "net.liftweb" %% "lift-actor" % "3.3.0"
+libraryDependencies += "net.liftweb" %% "lift-json" % "3.3.0"
 ```
 
 ## Using Kafka Actors
