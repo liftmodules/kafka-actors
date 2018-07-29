@@ -14,7 +14,7 @@ val kafkaVersion = settingKey[String]("Version of Kafka")
 
 liftVersion  := "3.3.0"
 liftEdition  := (liftVersion.apply(_.substring(0,3))).value
-kafkaVersion := "1.0.0"
+kafkaVersion := "1.1.1"
 
 moduleName := name.value + "_" + liftEdition.value
 
