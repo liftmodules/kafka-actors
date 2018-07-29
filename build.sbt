@@ -12,7 +12,7 @@ val liftVersion = settingKey[String]("Lift Web Framework full version number")
 val liftEdition = settingKey[String]("Lift Edition (such as 2.6 or 3.0)")
 val kafkaVersion = settingKey[String]("Version of Kafka")
 
-liftVersion  := "3.1.1"
+liftVersion  := "3.3.0"
 liftEdition  := (liftVersion.apply(_.substring(0,3))).value
 kafkaVersion := "1.0.0"
 
