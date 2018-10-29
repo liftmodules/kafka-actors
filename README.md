@@ -83,7 +83,7 @@ object ExampleConsumer extends KafkaActor with Loggable {
 }
 ```
 
-This actor will connect to a Kafka broker on the local machine and consumer messages from the
+This actor will connect to a Kafka broker on the local machine and consume messages from the
 `kafka-actors-example-consumer` Kafka topic. It will use the group id
 `kafka-actors-example-consumer` and it will wait 1 second for new messages in its event loop before
 giving up, doing some housecleaning, and polling again.
@@ -112,7 +112,7 @@ ExampleConsumer ! StartConsumer
 This will start up the Kafka consumer thread in the background and cause the actor to start reading
 from the specified Kafka topic. (There's also a `StopConsumer` parallel that will cleanly shut down.)
 
-Now how do we send messages do this actor _via_ Kafka? We need a `KafkaActorRef`. This is an
+Now how do we send messages to this actor _via_ Kafka? We need a `KafkaActorRef`. This is an
 abstraction over producing messages to Kafka. Declaring one is pretty simple:
 
 ```scala
